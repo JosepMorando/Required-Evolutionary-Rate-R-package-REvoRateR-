@@ -1,0 +1,211 @@
+---
+title: "Computing REvoRate from Gradient Forest models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Computing REvoRate from Gradient Forest models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  eval     = FALSE   # set to TRUE if data files are available
+)
+```
+
+## Overview
+
+**REvoRate** (*Required Evolutionary Rate*) quantifies the minimum rate of
+evolutionary change a population must achieve to remain adapted to its
+shifting climate.  It is derived from the **genetic offset** computed by a
+Gradient Forest (GF) model and a set of future climate raster stacks.
+
+This vignette walks through the full workflow, mirroring the analysis in:
+
+> Morando-Milà J, et al. (2025) Re-interpreting genetic offset: quantifying
+> the least required evolutionary rate under climate change at the
+> Mediterranean range margin of European beech. *Evolutionary Applications*.
+
+---
+
+## Installation
+
+```{r install}
+# From GitHub (recommended)
+# install.packages("remotes")
+remotes::install_github("your-github-username/REvoRate")
+```
+
+---
+
+## Prerequisites
+
+You need:
+
+1. A fitted `gradientForest` model object (here called `gfRef`).
+2. A `RasterStack` of **present-day** climate variables, with layer names
+   matching the GF predictor names (e.g. `bio2`, `bio4`, ...).
+3. One `RasterStack` per **future period** (e.g. four 20-year windows
+   2021–2040, 2041–2060, 2061–2080, 2081–2100).
+4. Optionally, a `data.frame` of site coordinates (`Long`, `Lat`) with row
+   names as site IDs.
+
+```{r setup}
+library(REvoRate)
+library(raster)
+library(gradientForest)
+
+# --- load your GF model and climate data ---
+load("paperPrepGFmodel.RData")          # provides: gfRef, envGF, coord
+
+# Present-day climate stack (layers named to match GF predictors)
+current_stack <- stack(
+  "wc2.1_30s_bio_2.tif",
+  "wc2.1_30s_bio_4.tif",
+  "wc2.1_30s_bio_5.tif",
+  "wc2.1_30s_bio_8.tif",
+  "wc2.1_30s_bio_9.tif",
+  "wc2.1_30s_bio_18.tif"
+)
+names(current_stack) <- names(envGF)   # must match GF predictor names
+
+# Future climate stacks — WorldClim CMIP6 (MPI-ESM1-2-HR, SSP5-8.5)
+p1 <- stack("wc2.1_30s_bioc_MPI-ESM1-2-HR_ssp585_2021-2040.tif")
+p2 <- stack("wc2.1_30s_bioc_MPI-ESM1-2-HR_ssp585_2041-2060.tif")
+p3 <- stack("wc2.1_30s_bioc_MPI-ESM1-2-HR_ssp585_2061-2080.tif")
+p4 <- stack("wc2.1_30s_bioc_MPI-ESM1-2-HR_ssp585_2081-2100.tif")
+
+# Crop / mask future stacks to the same extent as current_stack
+mask_r <- current_stack[[1]] > -100   # binary mask
+for (s in c("p1","p2","p3","p4")) {
+  tmp  <- get(s)
+  names(tmp) <- paste0("BIO", seq_len(nlayers(tmp)))
+  keep <- intersect(names(tmp), names(current_stack))
+  tmp  <- tmp[[keep]]
+  names(tmp) <- names(current_stack)[match(keep, names(current_stack))]
+  if (!compareRaster(tmp, mask_r, stopiffalse = FALSE))
+    tmp <- resample(tmp, mask_r, method = "bilinear")
+  tmp <- crop(tmp, extent(mask_r))
+  tmp <- mask(tmp, mask_r)
+  assign(s, tmp)
+}
+```
+
+---
+
+## Running REvoRate()
+
+```{r run}
+result <- REvoRate(
+  gf_model         = gfRef,
+  current_stack    = current_stack,
+  future_stacks    = list(p1 = p1, p2 = p2, p3 = p3, p4 = p4),
+  period_midpoints = c(p1 = 2030, p2 = 2050, p3 = 2070, p4 = 2090),
+  current_midpoint = 1985,       # midpoint of the 1970-2000 reference period
+  coords           = coord,      # data.frame with Long, Lat; rownames = site IDs
+  compute_climate_mismatch = TRUE,
+  standardize_mismatch     = TRUE,
+  verbose          = TRUE
+)
+
+print(result)
+```
+
+### What does `result` contain?
+
+| Element | Description |
+|---|---|
+| `$genetic_offset` | Named list of `RasterLayer` — one per period |
+| `$revoRate` | Named list of `RasterLayer` — one per period |
+| `$climate_mismatch` | Named list of plain climate-mismatch rasters |
+| `$climate_mismatch_gf` | Named list of GF-weighted mismatch rasters |
+| `$delta_t` | Year-deltas used for each period |
+| `$site_wide` | Wide-format data frame (one row per site) |
+| `$site_long` | Long-format (tidy) data frame |
+
+---
+
+## Inspecting raster outputs
+
+```{r rasters}
+# Genetic offset for 2061-2080
+plot(result$genetic_offset$p3, col = heat.colors(1000)[1000:1],
+     main = "Genetic Offset 2061-2080")
+
+# REvoRate for all periods
+par(mfrow = c(2, 2))
+for (nm in names(result$revoRate))
+  plot(result$revoRate[[nm]], main = paste("REvoRate", nm))
+```
+
+---
+
+## Tabular results
+
+```{r tables}
+head(result$site_wide)
+head(result$site_long)
+
+# Export
+write.csv(result$site_wide, "REvoRate_wide.csv", row.names = FALSE)
+write.csv(result$site_long, "REvoRate_long.csv", row.names = FALSE)
+```
+
+---
+
+## Publication figure
+
+```{r plot}
+# Interactive preview
+plot_revoRate(result, ncol = 6, palette = "cividis")
+
+# Save as PDF
+plot_revoRate(result,
+              ncol      = 6,
+              palette   = "cividis",
+              save_path = "Fig_REvoRate_trajectories.pdf",
+              width     = 12,
+              height    = 9)
+```
+
+---
+
+## Using individual functions
+
+All steps are also available as standalone exported functions, so you can
+integrate them into your own pipelines:
+
+```{r standalone}
+# Single-period genetic offset
+go_p1 <- compute_genetic_offset(gfRef, current_stack, p1)
+
+# REvoRate from a list of offsets
+go_list <- list(p1 = go_p1,
+                p2 = compute_genetic_offset(gfRef, current_stack, p2))
+rr      <- compute_revoRate(go_list, delta_t = c(p1 = 45, p2 = 20))
+
+# Climate mismatch
+cm    <- compute_climate_mismatch_plain(current_stack, p1, standardize = TRUE)
+cm_gf <- compute_climate_mismatch_gf(current_stack, p1, gfRef, standardize = TRUE)
+
+# Extract at sites
+extracted <- extract_site_metrics(
+  coords           = coord,
+  go_list          = go_list,
+  rr_list          = rr,
+  cm_plain         = list(p1 = cm),
+  cm_gf            = list(p1 = cm_gf),
+  period_midpoints = c(p1 = 2030, p2 = 2050),
+  raster_crs       = raster::crs(rr$p1)
+)
+```
+
+---
+
+## Session info
+
+```{r session}
+sessionInfo()
+```

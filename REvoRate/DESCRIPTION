@@ -1,0 +1,48 @@
+Package: REvoRate
+Title: Required Evolutionary Rate from Gradient Forest Genetic Offset
+Version: 0.1.0
+Authors@R: c(
+    person("Josep", "Morando-Milà",
+           email = "jmoranmi31@alumnes.ub.edu",
+           role = c("aut", "cre")),
+    person("Oriol", "Grau", role = "aut"),
+    person("Bartosz", "Ulaszewski", role = "aut"),
+    person("Albert", "Vilà-Cabrera", role = "aut"),
+    person("Josep", "Peñuelas", role = "aut"),
+    person("Alistair", "Jump", role = "aut"),
+    person("Ivan", "Scotti", role = "aut"))
+Description: Computes genetic offset and the Required Evolutionary Rate
+    (REvoRate) from a fitted Gradient Forest model and successive future
+    climate raster stacks, as introduced in Morando-Milà et al. (2025)
+    <doi:10.1111/eva.XXXXX> "Re-interpreting genetic offset: quantifying
+    the least required evolutionary rate under climate change at the
+    Mediterranean range margin of European beech" (Evolutionary
+    Applications). REvoRate (dG/dt) is derived as the product of the
+    rate of genomic change per unit of environmental change (dG/dE) and
+    the velocity of environmental change over time (dE/dt), discretised
+    over user-defined bidecadal periods. The package also computes plain
+    and GF-importance-weighted climate mismatch, extracts all metrics at
+    user-supplied site coordinates, and returns tidy wide and long data
+    frames ready for analysis and publication-quality plotting.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 4.1.0)
+Imports:
+    raster,
+    sp,
+    dplyr,
+    tidyr,
+    gradientForest,
+    methods
+Suggests:
+    ggplot2,
+    viridis,
+    scales,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
