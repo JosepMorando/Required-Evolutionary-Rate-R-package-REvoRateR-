@@ -35,7 +35,7 @@ This vignette walks through the full workflow, mirroring the analysis in:
 ```{r install}
 # From GitHub (recommended)
 # install.packages("remotes")
-remotes::install_github("your-github-username/REvoRate")
+remotes::install_github("your-github-username/REvoRateR")
 ```
 
 ---
@@ -53,7 +53,7 @@ You need:
    names as site IDs.
 
 ```{r setup}
-library(REvoRate)
+library(REvoRateR)
 library(raster)
 library(gradientForest)
 

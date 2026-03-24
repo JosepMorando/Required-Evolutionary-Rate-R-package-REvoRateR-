@@ -1,11 +1,11 @@
-# REvoRate <img src="man/figures/logo.png" align="right" height="120" alt="" />
+# REvoRateR <img src="man/figures/logo.png" align="right" height="120" alt="" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/your-github-username/REvoRate/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/your-github-username/REvoRate/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/your-github-username/REvoRateR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/your-github-username/REvoRateR/actions/workflows/R-CMD-check.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 <!-- badges: end -->
 
-**REvoRate** computes the *Required Evolutionary Rate* — the minimum rate of
+**REvoRateR** computes the *Required Evolutionary Rate* — the minimum rate of
 evolutionary change a population must sustain to remain locally adapted under
 projected climate change.  It is derived from **genetic offset** estimated by
 a [Gradient Forest](https://doi.org/10.1890/11-0252.1) model over successive
@@ -23,7 +23,7 @@ Developed alongside the paper:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("your-github-username/REvoRate")
+remotes::install_github("your-github-username/REvoRateR")
 ```
 
 > **Note:** `gradientForest` is not on CRAN. Install it first:
@@ -39,7 +39,7 @@ remotes::install_github("your-github-username/REvoRate")
 ## Quick start
 
 ```r
-library(REvoRate)
+library(REvoRateR)
 
 result <- REvoRate(
   gf_model         = gfRef,              # fitted gradientForest model

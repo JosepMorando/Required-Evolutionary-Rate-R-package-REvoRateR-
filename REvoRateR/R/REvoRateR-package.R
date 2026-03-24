@@ -1,4 +1,4 @@
-#' REvoRate: Required Evolutionary Rate from Gradient Forest
+#' REvoRateR: Required Evolutionary Rate from Gradient Forest
 #'
 #' @description
 #' Computes genetic offset and the Required Evolutionary Rate (REvoRate) from a
