@@ -25,7 +25,7 @@ Developed alongside the paper:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("your-github-username/REvoRateR")
+remotes::install_github("JosepMorando/REvoRateR")
 ```
 
 > **Note:** `gradientForest` is not on CRAN. Install it first:
