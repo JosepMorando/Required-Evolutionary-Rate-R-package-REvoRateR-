@@ -132,7 +132,7 @@ Note that in period 1, offset and REvoRate are linearly related (both measured f
 If you use this package, please cite the original paper:
 
 > Morando-Milà J, Grau O, Ulaszewski B, Vilà-Cabrera A, Peñuelas J, Jump A,
-> Scotti I (2025). Re-interpreting genetic offset: quantifying the least
+> Scotti I (2026). Re-interpreting genetic offset: quantifying the least
 > required evolutionary rate under climate change at the Mediterranean range
 > margin of European beech. *Evolutionary Applications*.
 
