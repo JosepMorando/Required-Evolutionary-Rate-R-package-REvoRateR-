@@ -13,7 +13,7 @@ future climate periods.
 
 Developed alongside the paper:
 
-> Morando-Milà J, et al. (2025) Re-interpreting genetic offset: quantifying
+> Morando-Milà J, et al. (2026) Re-interpreting genetic offset: quantifying
 > the least required evolutionary rate under climate change at the
 > Mediterranean range margin of European beech. *Evolutionary Applications*.
 
