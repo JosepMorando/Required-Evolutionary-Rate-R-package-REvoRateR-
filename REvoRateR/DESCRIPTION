@@ -1,4 +1,4 @@
-Package: REvoRate
+Package: REvoRateR
 Title: Required Evolutionary Rate from Gradient Forest Genetic Offset
 Version: 0.1.0
 Authors@R: c(
